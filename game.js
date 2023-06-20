@@ -16,6 +16,7 @@ function animatePress(currentColor) {
         $(currentColor).removeClass("pressed")
     }, 100)
 }
+
 function nextSequence() {
     userClickedPattern.splice(0, userClickedPattern.length)
     level++;
