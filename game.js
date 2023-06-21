@@ -1,9 +1,10 @@
 const buttonColors = ["red", "green", "blue", "yellow"]
+const userClickedPattern = []
+
 let gamePattern = []
-const userClickedPattern = [] 
 let level = 0
 let started = false
-let wait = false
+
 
 function playSound(name) {
     const audio = new Audio(`sounds/${name}.mp3`)
@@ -17,7 +18,7 @@ function animatePress(currentColor) {
     }, 100)
 }
 
-function nextSequence() {
+function nextSequence() { 
     userClickedPattern.splice(0, userClickedPattern.length)
     level++;
 
@@ -34,8 +35,6 @@ function nextSequence() {
 }
 
 $("[type='button']").click(function() {
-    if (wait)
-        return;
 
     const userChosenColor = this.id
     userClickedPattern.push(userChosenColor)
@@ -45,44 +44,48 @@ $("[type='button']").click(function() {
 
 
     if (userClickedPattern.length === gamePattern.length)
-        checkAnswer()
+        checkAnswer()  
+
 })
 
-$(function() {
-    $(this).keypress(function(e) {
-        if (started) return;
-        const code = e.keyCode
-        if (code === 97 || code === 65) {
-            nextSequence()
-            started = true
-        }
-    })
-})
+window.addEventListener("keypress", (e) => {
+    if (started) return;
+    const code = e.key
 
-function checkAnswer() {
-    for (let i = 0; i < gamePattern.length; i++) {
-        if (gamePattern[i] !== userClickedPattern[i]) {
-            playSound("wrong")
-            $("body").addClass("game-over")
-            setTimeout(() => {
-                $("body").removeClass("game-over")
-            }, 200)
-            $("#level-title").html("Game Over, press any key to restart.")
-            currentLevel = 0
-            startOver()
-            return;
-        }         
+    if (code === "a" || code === "A") {
+        nextSequence();
+        started = true
     }
+})
 
-    wait = true
-    setTimeout(() => {
-        nextSequence()
-        wait = false;
-    }, 1000)
+function wrongPattern() {
+    for (let i = 0; i < gamePattern.length; i++) {
+        if (gamePattern[i] !== userClickedPattern[i]) return true
 
+    }
+    return false
 }
 
-function startOver() {
+function checkAnswer() {
+    let isWrongPattern = wrongPattern()
+    if (isWrongPattern) {
+        playSound("wrong")
+        $("body").addClass("game-over")
+        setTimeout(() => {
+            $("body").removeClass("game-over")
+        }, 200)
+        $("#level-title").html("Game Over, press A to restart.")
+        reset()
+        
+        return;
+    }         
+    
+    setTimeout(() => {
+        nextSequence()
+    }, 1000)
+}
+
+function reset() {
     started = false
     gamePattern = []
     level = 0
